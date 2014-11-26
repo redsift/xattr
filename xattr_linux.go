@@ -16,8 +16,14 @@ func Getxattr(path, name string) ([]byte, error) {
 	name = userPrefix + name
 	// find size.
 	size, err := getxattr(path, name, nil, 0)
-	if err != nil {
+	//Typically if an xatter doesn't exist its not an error.
+	//It is the same as it being empty.
+	if err != nil && size < 0 {
 		return nil, &XAttrError{"getxattr", path, name, err}
+	}
+	//Well it is, buts it's more polite to just say nothing.
+	if size == 0 {
+		return nil, nil
 	}
 	buf := make([]byte, size)
 	// Read into buffer of that size.
@@ -33,8 +39,13 @@ func Getxattr(path, name string) ([]byte, error) {
 func Listxattr(path string) ([]string, error) {
 	// find size.
 	size, err := listxattr(path, nil, 0)
-	if err != nil {
+	//It's okay for the size to be 0, a file can have no xattr			
+	if err != nil && size < 0 {
 		return nil, &XAttrError{"listxattr", path, "", err}
+	}
+	//However if we don't have any xattr there no point buffing
+	if size == 0 {
+		return nil, nil
 	}
 	buf := make([]byte, size)
 	// Read into buffer of that size.

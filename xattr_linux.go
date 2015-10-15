@@ -8,7 +8,7 @@ const (
 	userPrefix = "user."
 )
 
-// Linux xattrs have a manditory prefix of "user.". This is prepended 
+// Linux xattrs have a manditory prefix of "user.". This is prepended
 // transparently for Get/Set/Remove and hidden in List
 
 // Retrieve extended attribute data associated with path.
@@ -34,18 +34,18 @@ func Getxattr(path, name string) ([]byte, error) {
 	return buf[:read], nil
 }
 
-// Retrieves a list of names of extended attributes associated with the 
+// Retrieves a list of names of extended attributes associated with the
 // given path in the file system.
 func Listxattr(path string) ([]string, error) {
 	// find size.
 	size, err := listxattr(path, nil, 0)
-	//It's okay for the size to be 0, a file can have no xattr			
+	//It's okay for the size to be 0, a file can have no xattr
 	if err != nil && size < 0 {
 		return nil, &XAttrError{"listxattr", path, "", err}
 	}
 	//However if we don't have any xattr there no point buffing
 	if size == 0 {
-		return nil, nil
+		return []string{}, nil
 	}
 	buf := make([]byte, size)
 	// Read into buffer of that size.
@@ -56,7 +56,7 @@ func Listxattr(path string) ([]string, error) {
 	return stripUserPrefix(nullTermToStrings(buf[:read])), nil
 }
 
-// Associates name and data together as an attribute of path. 
+// Associates name and data together as an attribute of path.
 func Setxattr(path, name string, data []byte) error {
 	name = userPrefix + name
 	if err := setxattr(path, name, &data[0], len(data)); err != nil {

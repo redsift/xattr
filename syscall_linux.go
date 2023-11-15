@@ -35,10 +35,16 @@ func setxattr(path string, name string, value *byte, size int) (err error) {
 		uintptr(unsafe.Pointer(syscall.StringBytePtr(path))),
 		uintptr(unsafe.Pointer(syscall.StringBytePtr(name))),
 		uintptr(unsafe.Pointer(value)), uintptr(size), 0, 0)
+	if e1 == syscall.Errno(0) {
+		return nil
+	}
 	return e1
 }
 
 func removexattr(path string, name string) (err error) {
 	_, _, e1 := syscall.Syscall(syscall.SYS_REMOVEXATTR, uintptr(unsafe.Pointer(syscall.StringBytePtr(path))), uintptr(unsafe.Pointer(syscall.StringBytePtr(name))), 0)
+	if e1 == syscall.Errno(0) {
+		return nil
+	}
 	return e1
 }
